@@ -129,8 +129,10 @@ summary(m1)
 ```
 
 ```{r}
-m2 = brm(PR~1+ authority, family = bernoulli(link = "logit"), compdata, chains=2, cores=2)
+m2 = brm(PR~1+ authority+ (1+authority|ID), family = bernoulli(link = "logit"), compdata, chains=2, cores=2)
 summary(m2)
+
+plot(marginal_effects(m2))
 ```
 
 ```{r}
@@ -143,7 +145,9 @@ summary(m3)
 #plotting m3
 pairs(m3)
 
-plot(m3)
+plot(marginal_effects(m3))
+
+
 
 ```
 
@@ -154,11 +158,13 @@ m4 = brm(PR~1+authority+reliability+V1.c+(1+authority+reliability+V1.c|ID), fami
 summary(m4)
 
 plot(m4)
+
+plot(marginal_effects(m4))
 ```
 
 ```{r}
 
-m5 = brm(PR~1+authority*V1.c*reliability+(1+authority+reliability+V1.c|ID), family=bernoulli(link = "logit"), compdata, chains=2, cores=2)
+m5 = brm(PR~1+authority*V1.c*reliability+(1+authority*reliability*V1.c|ID), family=bernoulli(link = "logit"), compdata, chains=2, cores=2)
 
 summary(m5)
 
@@ -166,11 +172,12 @@ plot(m5)
 ```
 
 ```{r}
-m6 = brm(PR~1+authority*total.c*reliability+(1+authority+reliability+V1.c|ID), family=bernoulli(link = "logit"), compdata, chains=2, cores=2)
+m6 = brm(PR~1+authority*total.c*reliability+(1+authority*total.c*reliability|ID), family=bernoulli(link = "logit"), compdata, chains=2, cores=2)
 
 summary(m6)
 
 plot(m6)
+
 ```
 
 ```{r}
@@ -188,19 +195,13 @@ PR.PI = apply(sim.PR,2,PI, prob =0.89)
 ```{r}
 
 m2 <- add_ic(m2, ic="waic")
-m3 <- add_ic(m3, ic="waic")
 m4 <- add_ic(m4, ic="waic")
 m5 <- add_ic(m5, ic="waic")
 m6 <- add_ic(m6, ic="waic")
 
-compare_ic(m2,m3,m4,m5,m6, ic="waic")
+compare_ic(m2,m4,m5, m6, ic="waic")
 
-model_weights(m2, m3, m4, m5, m6, ic="waic")
-
-
-
-
-
+model_weights(m2, m4,m5, m6, ic="waic")
 
 ```
 
@@ -231,16 +232,17 @@ sim.m5 = sim(m5, data = compdata, n=1e4)
 dens(sim.m5, col = "red", xlim = c(-1,2), ylim = c(0,5),  xlab = "PR")
 par(new=TRUE)
 dens(compdata$PR, xlim = c(-1, 2), ylim = c(0,5), xlab = "PR")
-title("Model 5")
+title("Predicitive Posterior: Model 5")
 ```
-
 
 ```{r}
-
+#dens plot simulated data from model on raw data
+sim.m6 = sim(m6, data = compdata, n=1e4)
+dens(sim.m6, col = "red", xlim = c(-1,2), ylim = c(0,5),  xlab = "PR")
+par(new=TRUE)
+dens(compdata$PR, xlim = c(-1, 2), ylim = c(0,5), xlab = "PR")
+title("Predicitive Posterior: Model 6")
 ```
-
-
-
 
 
 
